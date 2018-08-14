@@ -6,7 +6,7 @@ import axios from 'axios'
 // Create Unique Api Key
 let apiConfig = {
   headers: {
-    apikey: ''
+    apikey: '75gvjg83hs0'
   }
 }
 
@@ -38,15 +38,32 @@ class App extends Component {
   }
 
   componentDidMount(){
+    this.getGods()
   }
 
   getGods(){
     // axios (GET)
-    // setState with response -> gods
+    axios.get(baseUrl, apiConfig)
+      .then(res => {
+        console.log(res)
+         // setState with response -> gods
+        this.setState({
+          gods: res.data,
+          oneGod: [],
+          create: false
+        })
+      })
   }
 
   getOneGod(id){
     // axios (GET)
+    axios.get(`${baseUrl}/${id}`, apiConfig)
+      .then(res => {
+        this.setState({
+          oneGod: res.data,
+          gods: []
+        })
+      })
     // setState with response -> oneGod
   }
 
@@ -54,7 +71,25 @@ class App extends Component {
     const { name } = this.state
     const { id } = this.state.oneGod
     // axios (PATCH)
-    // setState with ????????????????
+    axios.patch(`${baseUrl}/${id}`, {name}, apiConfig)
+      .then(res => {
+        this.setState({
+          oneGod: res.data,
+          editName: false,
+          name: ''
+        })
+      })
+  }
+  updateState(res) {
+    this.setState({
+      gods: res.data,
+      create: false,
+      demigod: false,
+      name: '',
+      origin: '',
+      image: '',
+      power: ''
+    })
   }
 
   createGod(){
@@ -66,11 +101,20 @@ class App extends Component {
       powers: this.state.power
     }
     // axios (POST)
+    axios.post(baseUrl, newGod, apiConfig)
+      .then(res => this.updateState(res))
     // setState with ????????????????
   }
 
   deleteGod(id){
     // axios (DELETE)
+    axios.delete(`${baseUrl}/${id}`, apiConfig)
+      .then(res => {
+        this.setState({
+          gods: res.data,
+          oneGod: {}
+        })
+      })
     // setState with ?????????????????
   }
 
@@ -107,7 +151,7 @@ class App extends Component {
 
 
   render() {
-    const { oneGod, oneGodPowers, editName, create } = this.state;
+    const { oneGod, editName, create } = this.state;
 
     const gods = this.state.gods.map(god => {
       return (
@@ -117,6 +161,14 @@ class App extends Component {
         </div>
       )
     })
+    let oneGodPowers;
+    if(this.state.oneGod.powers){
+      oneGodPowers = this.state.oneGod.powers.map((power, i) => {
+        return (
+        <h4 key={i}>{power}</h4>
+        )
+      })
+    }
     
     return (
       <div className="App">
